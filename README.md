@@ -30,6 +30,7 @@
 | --- | --- |
 | <p align="center"><a href="https://github.com/kdw0737"><img width="160px" src="https://github.com/user-attachments/assets/b3f11db1-454b-4e90-a8d6-8ad03846b883" alt="김도욱 프로필" style="display: block; margin: 0 auto;" /></a></p> | <p align="center"><a href="https://github.com/KangJiSseok"><img width="160px" src="https://github.com/user-attachments/assets/ec1e37e4-1399-4cc9-9964-287cae08dbdb" alt="강지석 프로필" style="display: block; margin: 0 auto;" /></a></p> |
 | [@kdw0737](https://github.com/kdw0737) | [@KangJiSseok](https://github.com/KangJiSseok) |
+|BE|BE|
 <br />
 
 ## 📚 스택
