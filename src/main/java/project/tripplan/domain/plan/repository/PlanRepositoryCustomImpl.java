@@ -75,6 +75,7 @@ public class PlanRepositoryCustomImpl implements PlanRepositoryCustom {
 
 		// 필터링 조건
 		BooleanBuilder builder = buildSearchCondition(req, ppcFilter, pcFilter);
+		builder.and(plan.status.eq(PlanStatus.PUBLIC));
 
 		// 쿼리 생성
 		JPAQuery<Plan> query = qf
@@ -229,6 +230,8 @@ public class PlanRepositoryCustomImpl implements PlanRepositoryCustom {
 
 		BooleanBuilder builder = buildSearchCondition(req, ppcFilter, pcFilter);
 
+		builder.and(plan.status.eq(PlanStatus.PUBLIC));
+
 		Long countResult = qf
 			.select(plan.countDistinct())
 			.from(plan)
@@ -310,6 +313,16 @@ public class PlanRepositoryCustomImpl implements PlanRepositoryCustom {
 			.fetchOne();
 
 		return Optional.ofNullable(result);
+	}
+
+	@Override
+	public List<Plan> findAllByIds(List<Long> planIds) {
+		if (planIds == null || planIds.isEmpty()) return List.of();
+
+		return qf
+			.selectFrom(plan)
+			.where(plan.id.in(planIds))
+			.fetch();
 	}
 
 	private boolean checkKeywordExistsInDB(String keyword) {

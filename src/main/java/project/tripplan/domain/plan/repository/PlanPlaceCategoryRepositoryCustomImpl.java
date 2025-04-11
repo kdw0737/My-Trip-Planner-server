@@ -1,5 +1,6 @@
 package project.tripplan.domain.plan.repository;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -34,24 +35,26 @@ public class PlanPlaceCategoryRepositoryCustomImpl implements PlanPlaceCategoryR
 	}
 
 	@Override
-	public List<PlanPlaceCategory> findAllByPlanIds(List<Long> planIds) {
+	public List<PlanPlaceCategory> findAllByPlanIds(Collection<Long> planIds) {
+		if (planIds == null || planIds.isEmpty()) return List.of();
+
 		return qf.selectFrom(planPlaceCategory)
 			.join(planPlaceCategory.placeCategory, placeCategory).fetchJoin()
-			.join(planPlaceCategory.plan, plan).fetchJoin()
-			.where(plan.id.in(planIds))
+			.where(planPlaceCategory.plan.id.in(planIds))
 			.fetch();
 	}
 
+
 	@Override
-	public List<PlanPlaceCategory> findHotPlacesByPlaceName(String placeName, int limit) {
-		return qf.selectFrom(planPlaceCategory)
-			.join(planPlaceCategory.placeCategory, placeCategory).fetchJoin()
-			.join(planPlaceCategory.plan, plan).fetchJoin()
-			.where(placeCategory.name.eq(placeName)
-				.and(planPlaceCategory.plan.status.eq(PlanStatus.PUBLIC)))
-			.orderBy(plan.createdAt.desc(),plan.createdAt.desc())
+	public List<Long> findPlanIdsByPlaceName(String keyword, int limit) {
+		return qf
+			.select(plan.id)
+			.from(planPlaceCategory)
+			.join(planPlaceCategory.placeCategory, placeCategory)
+			.join(planPlaceCategory.plan, plan)
+			.where(placeCategory.name.eq(keyword).and(plan.status.eq(PlanStatus.PUBLIC)))
+			.distinct()
 			.limit(limit)
 			.fetch();
 	}
-
 }

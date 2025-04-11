@@ -1,5 +1,6 @@
 package project.tripplan.domain.plan.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,11 +34,13 @@ public class PlanTransCategoryRepositoryCustomImpl implements PlanTransCategoryR
 	}
 
 	@Override
-	public List<PlanTransportationCategory> findAllByPlanIds(List<Long> planIds) {
+	public List<PlanTransportationCategory> findAllByPlanIds(Collection<Long> planIds) {
+		if (planIds == null || planIds.isEmpty()) return List.of();
+
 		return qf.selectFrom(planTransCategory)
-			.join(planTransCategory.plan,plan).fetchJoin()
 			.join(planTransCategory.transportationCategory, transCategory).fetchJoin()
-			.where(plan.id.in(planIds))
+			.where(planTransCategory.plan.id.in(planIds))
 			.fetch();
 	}
+
 }

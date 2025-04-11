@@ -288,112 +288,78 @@ public class PlanService {
 
 	@Transactional(readOnly = true)
 	public HomeRes getHome() {
-		List<Plan> findMostViewed = planRepositoryCustom.findMostViewedPlans(10);
-		List<Plan> findMostRecent = planRepositoryCustom.findMostRecentPlans(10);
-		List<PlanPlaceCategory> findHotPlaces = planPlaceCategoryRepositoryCustom.findHotPlacesByPlaceName("강남", 10);
+		List<Plan> mostViewedPlans = planRepositoryCustom.findMostViewedPlans(10);
+		List<Plan> mostRecentPlans = planRepositoryCustom.findMostRecentPlans(10);
 
-		// planId 추출
-		List<Long> mostViewedPlanIds = findMostViewed.stream()
+		List<Long> mostViewedPlanIds = mostViewedPlans.stream()
 			.map(Plan::getId)
 			.toList();
 
-		List<Long> mostRecentPlanIds = findMostRecent.stream()
+		List<Long> mostRecentPlanIds = mostRecentPlans.stream()
 			.map(Plan::getId)
 			.toList();
 
-		// PlaceCategory와 TransportationCategory 데이터 조회
-		List<PlanPlaceCategory> mostViewedPlaces = planPlaceCategoryRepositoryCustom.findAllByPlanIds(
-			mostViewedPlanIds);
-		List<PlanPlaceCategory> mostRecentPlaces = planPlaceCategoryRepositoryCustom.findAllByPlanIds(
-			mostRecentPlanIds);
+		// 2. "강남"이 포함된 Plan ID 조회 (10개)
+		List<Long> hotPlacePlanIds = planPlaceCategoryRepositoryCustom.findPlanIdsByPlaceName("강남", 10);
 
-		List<PlanTransportationCategory> mostViewedTrans = planTransCategoryRepositoryCustom.findAllByPlanIds(
-			mostViewedPlanIds);
-		List<PlanTransportationCategory> mostRecentTrans = planTransCategoryRepositoryCustom.findAllByPlanIds(
-			mostRecentPlanIds);
+		// 3. 전체 대상 Plan ID 통합
+		Set<Long> allPlanIds = new HashSet<>();
+		allPlanIds.addAll(mostViewedPlanIds);
+		allPlanIds.addAll(mostRecentPlanIds);
+		allPlanIds.addAll(hotPlacePlanIds);
 
-		// 핫플레이스에 필요한 데이터 조회
-		List<Long> hotPlacePlanIds = findHotPlaces.stream()
-			.map(planPlaceCategory -> planPlaceCategory.getPlan().getId())
-			.toList();
+		// 4. 연관 데이터 한 번에 조회
+		List<PlanPlaceCategory> allPlaces = planPlaceCategoryRepositoryCustom.findAllByPlanIds(allPlanIds);
+		List<PlanTransportationCategory> allTrans = planTransCategoryRepositoryCustom.findAllByPlanIds(allPlanIds);
 
-		List<PlanTransportationCategory> hotPlacesTrans = planTransCategoryRepositoryCustom.findAllByPlanIds(
-			hotPlacePlanIds);
+		// 5. HotPlace Plan 조회
+		List<Plan> hotPlacePlans = planRepositoryCustom.findAllByIds(hotPlacePlanIds);
 
-		// DTO 변환
-		List<HomeRes.PlanInfo> mostViewedPlans = convertToPlanInfo(findMostViewed, mostViewedPlaces, mostViewedTrans);
-		List<HomeRes.PlanInfo> mostRecentPlans = convertToPlanInfo(findMostRecent, mostRecentPlaces, mostRecentTrans);
-		List<HomeRes.PlanInfo> hotPlacePlans = convertHotPlacesToPlanInfo(findHotPlaces, hotPlacesTrans);
+		// 6. 공통 맵핑 처리 (placeMap, transMap 재사용)
+		Map<Long, List<String>> placeMap = allPlaces.stream()
+			.collect(Collectors.groupingBy(
+				ppc -> ppc.getPlan().getId(),
+				Collectors.mapping(ppc -> ppc.getPlaceCategory().getName(), Collectors.toList())
+			));
 
-		// 결과 반환
-		return new HomeRes(mostViewedPlans, mostRecentPlans, hotPlacePlans);
+		Map<Long, String> transMap = allTrans.stream()
+			.collect(Collectors.toMap(
+				ptc -> ptc.getPlan().getId(),
+				ptc -> ptc.getTransportationCategory().getName().toString(),
+				(existing, replace) -> existing // 중복 시 첫 번째 값 유지
+			));
+
+		// 7. DTO 변환
+		List<HomeRes.PlanInfo> mostViewedDTOs = convertToPlanInfo(mostViewedPlans, placeMap, transMap);
+		List<HomeRes.PlanInfo> mostRecentDTOs = convertToPlanInfo(mostRecentPlans, placeMap, transMap);
+		List<HomeRes.PlanInfo> hotPlaceDTOs = convertToPlanInfo(hotPlacePlans, placeMap, transMap);
+
+		// 8. 결과 반환
+		return new HomeRes(mostViewedDTOs, mostRecentDTOs, hotPlaceDTOs);
 	}
+
+
 
 	private List<HomeRes.PlanInfo> convertToPlanInfo(
 		List<Plan> plans,
-		List<PlanPlaceCategory> placeCategories,
-		List<PlanTransportationCategory> transCategories
+		Map<Long, List<String>> placeMap,
+		Map<Long, String> transMap
 	) {
-		// PlaceCategory와 TransportationCategory를 Plan ID 기준으로 그룹화
-		Map<Long, List<String>> placeCategoryMap = placeCategories.stream()
-			.collect(Collectors.groupingBy(
-				p -> p.getPlan().getId(),
-				Collectors.mapping(p -> p.getPlaceCategory().getName(), Collectors.toList())
-			));
-
-		Map<Long, String> transCategoryMap = transCategories.stream()
-			.collect(Collectors.toMap(
-				t -> t.getPlan().getId(),
-				t -> t.getTransportationCategory().getName().toString(), // Enum 타입을 String으로 변환
-				(existing, replacement) -> existing // 중복 발생 시 첫 번째 값 유지
-			));
-
-		// Plan 데이터를 기반으로 DTO 생성
 		return plans.stream()
 			.map(plan -> new HomeRes.PlanInfo(
 				plan.getId(),
 				plan.getTitle(),
-				placeCategoryMap.getOrDefault(plan.getId(), List.of()), // PlaceCategory가 없으면 빈 리스트 반환
+				placeMap.getOrDefault(plan.getId(), List.of()),
 				plan.getStartDate(),
 				plan.getEndDate(),
 				plan.getPeople(),
-				transCategoryMap.getOrDefault(plan.getId(), null), // TransportationCategory가 없으면 null 반환
+				transMap.getOrDefault(plan.getId(), null),
 				plan.getTotalCost().intValue(),
 				plan.getImageUrl() != null ? prefix + "/" + plan.getImageUrl() : null
 			))
 			.toList();
 	}
 
-	private List<HomeRes.PlanInfo> convertHotPlacesToPlanInfo(
-		List<PlanPlaceCategory> placeCategories,
-		List<PlanTransportationCategory> transCategories
-	) {
-		// TransportationCategory를 Plan ID 기준으로 그룹화
-		Map<Long, String> transCategoryMap = transCategories.stream()
-			.collect(Collectors.toMap(
-				t -> t.getPlan().getId(),
-				t -> t.getTransportationCategory().getName().toString(), // Enum 타입을 String으로 변환
-				(existing, replacement) -> existing // 중복 발생 시 첫 번째 값 유지
-			));
-
-		// PlanPlaceCategory 데이터를 기반으로 DTO 생성
-		return placeCategories.stream()
-			.map(placeCategory -> {
-				Plan plan = placeCategory.getPlan();
-				return new HomeRes.PlanInfo(
-					plan.getId(),
-					plan.getTitle(),
-					List.of(placeCategory.getPlaceCategory().getName()), // 단일 PlaceCategory만 포함
-					plan.getStartDate(),
-					plan.getEndDate(),
-					plan.getPeople(),
-					transCategoryMap.getOrDefault(plan.getId(), null), // TransportationCategory가 없으면 null 반환
-					plan.getTotalCost().intValue(),
-					plan.getImageUrl() != null ? prefix + "/" + plan.getImageUrl() : null
-				);
-			})
-			.toList();
-	}
 
 	@Transactional(readOnly = true)
 	public Page<PlanCommentsRes> getPlanComments(Long planId, int page, int size) {

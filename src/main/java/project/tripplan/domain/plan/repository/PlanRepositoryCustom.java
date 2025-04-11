@@ -23,4 +23,6 @@ public interface PlanRepositoryCustom {
 	Page<UserPlanRes> findPlansByUserId(Long userId, Pageable pageable);
 
 	Optional<Plan> findPlanWithAllChildren(Long planId);
+
+	List<Plan> findAllByIds(List<Long> planIds);
 }

@@ -23,7 +23,7 @@ public class PlanSearchRes {
 	public PlanSearchRes(Plan plan, String prefix) {
 		this.planId = plan.getId();
 		this.title = plan.getTitle();
-		this.thumbnail = prefix + "/" + plan.getImageUrl();
+		this.thumbnail = (plan.getImageUrl() == null) ? null : prefix + "/" + plan.getImageUrl();
 		this.transportation = plan.getFirstTransportCategoryName();
 		this.startDate = plan.getStartDate();
 		this.endDate = plan.getEndDate();
