@@ -20,14 +20,20 @@
 - [ERD](#ERD)
 - [아키텍처](#아키텍처)
 - [기능](#기능)
-  
+
+---
+
 ## 💻 개발 기간
 > 2025.01.03 ~ 2025.03.16 
 <br />
 
+---
+
 ## 🖥 배포 주소
 > https://trip-plan-frontend.vercel.app
 <br />
+
+---
 
 ## 🙍‍♂️ 팀원 구성
 | 김도욱 | 강지석 |
@@ -36,6 +42,8 @@
 | [@kdw0737](https://github.com/kdw0737) | [@KangJiSseok](https://github.com/KangJiSseok) |
 |BE|BE|
 <br />
+
+---
 
 ## 📚 스택
 <br/>
@@ -58,12 +66,18 @@
   <img src="https://img.shields.io/badge/postman-FF6C37?style=for-the-badge&logo=postman&logoColor=black">
 </div>
 
+---
+
 ## 💾 ERD
 <p align="center"><img src= "https://github.com/user-attachments/assets/09aa59c4-c192-420e-8162-7521e64d7583">
 
+---
+
 ## 🏡 아키텍처
 <p align="center"><img src= "https://github.com/user-attachments/assets/0a6a4bc2-1372-4d5e-9ac6-30c6f86dea36">
-
+  
+---
+  
 ## 🔧 기능
 
 | 메인 화면 | 검색 화면 | 마이페이지 |
