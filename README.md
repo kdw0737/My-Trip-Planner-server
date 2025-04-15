@@ -58,6 +58,7 @@
 <p align="center"><img src= "https://github.com/user-attachments/assets/09aa59c4-c192-420e-8162-7521e64d7583">
 
 ## 아키텍처
+<p align="center"><img src= "https://github.com/user-attachments/assets/0a6a4bc2-1372-4d5e-9ac6-30c6f86dea36">
 
 ## 기능
 
