@@ -1,6 +1,6 @@
 # 🗺 마이 트립 플래너
 <img width="1200" alt="로고" src="https://github.com/user-attachments/assets/e8013f2b-c260-44e3-b9c2-388aa2e17aac">
-
+---
 # 📣 소개
 여행 계획을 세우기 힘드신가요? <br>
 마이 트립 플래너를 사용해보세요! <br>
@@ -61,5 +61,7 @@
 <p align="center"><img src= "https://github.com/user-attachments/assets/0a6a4bc2-1372-4d5e-9ac6-30c6f86dea36">
 
 ## 기능
-
-
+| 메인 화면 | 검색 화면 | 마이페이지 |
+|:------:|:------:|:------:|
+| <img src="https://github.com/user-attachments/assets/e6096ae5-6ca0-45c9-8014-322a2d2942d8" width="250"> | <img src="https://github.com/user-attachments/assets/5f7ad06d-5adb-4448-9115-b78778810ddd" width="250"> | <img src = "https://github.com/user-attachments/assets/491b4971-f1e3-401c-9ebe-7a8247094c29" width = "250">|
+| · 여행 계획 글들을 보여줍니다. <br> · 최신 게시글, 인기 게시글, 핫플레이스 게시글을 확인할 수 있습니다. | · 게시글을 검색할 수 있습니다. <br> ·지역, 기간/인원, 교통수단으로 필터링할 수 있습니다. | · 마이페이지에서 닉네임 변경이 가능합니다. <br> · 내 활동 기록 및 임시저장 글을 확인할 수 있습니다. |
